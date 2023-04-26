@@ -1,6 +1,6 @@
 #pragma once
-#define CAPACITY 10
 #include <string>
+#include <iostream>
 namespace vehicle {
 	enum VehicleType {
 		RAILWAY,
@@ -13,34 +13,43 @@ namespace vehicle {
 	};
 	class Vehicle {
 	private:
-		VehicleType _model;
+		VehicleType _type;
 		std::string _name;
 		float _k;
 		float _a;
 		EngineType _engine;
 	public:
-		VehicleType get_model();
-		std::string get_name();
-		float get_k();
-		float get_a();
-		EngineType get_engine();
-		Vehicle(VehicleType type, std::string name, float k);
+		std::string get_type() const;
+		std::string get_name() const;
+		float get_k() const;
+		float get_a() const;
+		EngineType get_engine() const;
+		Vehicle(VehicleType type, std::string name,float k);
 		Vehicle(VehicleType type, std::string name, float k, float a);
 		Vehicle(VehicleType type, std::string name, float k, EngineType engine);
 		Vehicle();
 		float calc(float m, float d);
 	};
+	std::ostream& operator<<(std::ostream& stream, const Vehicle& vehicle);
 	class VehicleList {
 	private:
-		Vehicle _vehicles[CAPACITY];
+		Vehicle** _vehicles;
 		int _size;
 	public:
+		VehicleList(const VehicleList& copy);
 		VehicleList();
-		int size();
-		Vehicle operator[](int index);
+		~VehicleList();
+		int size() const ;
+		const Vehicle& operator[](int index) const;
+		Vehicle& operator[](int index);
+		VehicleList& operator=(VehicleList copy);
+		void swap(VehicleList& rhs) noexcept;
 		void insert(Vehicle vehicle, int index);
 		void add(Vehicle vehicle);
 		void remove(int index);
+		void clear();
+		const Vehicle& get_vehicle(int index) const;
 	};
 	int min(VehicleList& vehicles, float m, float d);
+	std::ostream& operator<<(std::ostream& stream, const VehicleList& vehicles);
 }

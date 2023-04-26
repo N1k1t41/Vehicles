@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(vehicles CXX)
+cmake_minimum_required(VERSION 3.11)
+
+project(vehicle CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -17,17 +19,26 @@ if(MSVC)
     endif()
 endif()
 
-# Объявляем библиотеку
-add_library(functions SHARED "include/functions/vehiclearg.h" "src/vehiclefunc.cc" "src/vehiclelistfunc.cpp")
-target_include_directories(functions PUBLIC "include")
-
 # Подключаем googletest
 include(FetchContent)
 FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/6b63c98ac43efc992122f1da12aaf0a0e0658206.zip)
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-# Объявляем тесты
-add_executable(functions_tests "tests/vehicletests.cc")
-target_link_libraries(functions_tests functions GTest::gtest_main)
+# Объявляем библиотеку
+add_library(vehicle SHARED
+    "include/functions/vehiclearg.h"
+    "src/vehiclefunc.cc"
+    "src/vehiclelistfunc.cc"
+)
+target_include_directories(vehicle PUBLIC "include")
 
+# Объявляем тесты
+add_executable(vehicle-tests
+    "tests/vehicletests.cc"
+)
+target_link_libraries(vehicle-tests vehicle GTest::gtest_main)
+
+# Объявляем исполняемый файл
+add_executable(main "src/main.cc")
+target_link_libraries(main vehicle)
