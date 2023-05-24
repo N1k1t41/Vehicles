@@ -1,55 +1,86 @@
 #pragma once
-#include <string>
+#include <conio.h>
+#include <cstdio>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+#include <windows.h>
+
 namespace vehicle {
-	enum VehicleType {
-		RAILWAY,
-		WATER,
-		AIR
-	};
 	enum EngineType {
 		TURB,
 		REACT
 	};
 	class Vehicle {
-	private:
-		VehicleType _type;
+	protected:
 		std::string _name;
-		float _k;
-		float _a;
+		double _k;
+	public:
+		Vehicle();
+		Vehicle(const std::string& name, double k);
+		Vehicle(const Vehicle&) = default;
+		Vehicle& operator=(const Vehicle&) = default;
+		std::string get_name() const;
+		double get_k() const;
+		virtual double calc(double m, double d) = 0;
+		virtual void print() const = 0;
+		virtual std::shared_ptr<Vehicle> clone() const = 0;
+	};
+
+	class Railway : public Vehicle {
+	public:
+		Railway();
+		Railway(const std::string& name, double k);
+		double calc(double m, double d) override;
+		std::shared_ptr<Vehicle> clone() const override;
+		void print() const override;
+	};
+
+	class Water : public Vehicle {
+	private:
+		double _a;
+	public:
+		Water();
+		Water(const std::string& name, double k, double a);
+		double get_a() const;
+		double calc(double m, double d) override;
+		std::shared_ptr<Vehicle> clone() const override;
+		void print() const override;
+	};
+
+	class Air : public Vehicle {
+	private:
 		EngineType _engine;
 	public:
-		std::string get_type() const;
-		std::string get_name() const;
-		float get_k() const;
-		float get_a() const;
-		EngineType get_engine() const;
-		Vehicle(VehicleType type, std::string name,float k);
-		Vehicle(VehicleType type, std::string name, float k, float a);
-		Vehicle(VehicleType type, std::string name, float k, EngineType engine);
-		Vehicle();
-		float calc(float m, float d);
+		Air();
+		Air(const std::string& name, double k, EngineType engine);
+		std::string get_engine() const;
+		double calc(double m, double d) override;
+		std::shared_ptr<Vehicle> clone() const override;
+		void print() const override;
 	};
-	std::ostream& operator<<(std::ostream& stream, const Vehicle& vehicle);
-	class VehicleList {
+
+	using VehiclePtr = std::shared_ptr<Vehicle>;
+
+	class VehicleList{
 	private:
-		Vehicle** _vehicles;
-		int _size;
+		std::vector<VehiclePtr> _vehicles;
 	public:
-		VehicleList(const VehicleList& copy);
-		VehicleList();
-		~VehicleList();
-		int size() const ;
-		const Vehicle& operator[](int index) const;
-		Vehicle& operator[](int index);
-		VehicleList& operator=(VehicleList copy);
-		void swap(VehicleList& rhs) noexcept;
-		void insert(Vehicle vehicle, int index);
-		void add(Vehicle vehicle);
+		VehicleList() = default;
+		VehicleList(const VehicleList& list);
+		VehicleList& operator=(VehicleList list);
+		void swap(VehicleList& list) noexcept;
+		const VehiclePtr operator[](size_t index) const;
+		VehiclePtr operator[](size_t index);
+		size_t get_size() const;
+		void add(VehiclePtr vehicle);
+		void insert(VehiclePtr vehicle, int index);
 		void remove(int index);
+		void print() const;
 		void clear();
-		const Vehicle& get_vehicle(int index) const;
+		int minim(double m, double d);
 	};
-	int min(VehicleList& vehicles, float m, float d);
-	std::ostream& operator<<(std::ostream& stream, const VehicleList& vehicles);
 }

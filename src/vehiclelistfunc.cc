@@ -1,97 +1,78 @@
 #include <functions/vehiclearg.h>
-#include <stdexcept>
-using namespace vehicle;
 using namespace std;
-VehicleList::VehicleList() :_vehicles(nullptr), _size(0) {}
+using namespace vehicle;
 
-VehicleList::VehicleList(const VehicleList& copy) :
-	_vehicles(new Vehicle* [copy._size]),
-	_size(copy._size)
-{
-	for (int i = 0; i < _size; ++i)
-		_vehicles[i] = new Vehicle(*copy._vehicles[i]);
+VehicleList::VehicleList(const VehicleList& vehicles) {
+	for (int i = 0; i < _vehicles.size(); ++i) {
+		_vehicles.push_back(vehicles[i]->clone());
+	}
 };
 
-void VehicleList::swap(VehicleList& rhs) noexcept{
-	std::swap(_size, rhs._size);
-	std::swap(_vehicles, rhs._vehicles);
-}
-VehicleList& VehicleList::operator=(VehicleList copy){
-	swap(copy);
+VehicleList& VehicleList::operator=(VehicleList vehicles) {
+	swap(vehicles);
 	return *this;
 }
-VehicleList::~VehicleList(){
-	clear();
+
+void VehicleList::swap(VehicleList& vehicles) noexcept {
+	_vehicles.swap(vehicles._vehicles);
 }
+
 void VehicleList::clear() {
-	if (_vehicles == nullptr)
-		return;
-	for (int i = 0; i < _size; ++i)
-		delete _vehicles[i];
-	_size = 0;
-	delete[] _vehicles;
-	_vehicles = nullptr;
+	_vehicles.clear();
 }
-int VehicleList::size() const {
-	return _size;
+
+const VehiclePtr VehicleList::operator[](size_t index) const {
+	if (index < 0 or _vehicles.size() <= index)
+		throw out_of_range("Invalid index");
+	return _vehicles[index];
 }
-const Vehicle& VehicleList::operator[](int index) const {
-	if (index < 0 or index >= _size) {
-		throw out_of_range("error");
-	}
-	return *_vehicles[index];
+
+VehiclePtr VehicleList::operator[](size_t index) {
+	if (index < 0 or _vehicles.size() <= index)
+		throw out_of_range("Invalid index");
+	return _vehicles[index];
 }
-Vehicle& VehicleList::operator[](int index) {
-	if (index < 0 or index >= _size) {
-		throw out_of_range("error");
-	}
-	return *_vehicles[index];
+
+void VehicleList::add(VehiclePtr vehicle) {
+	_vehicles.push_back(vehicle);
 }
-void VehicleList::insert(Vehicle vehicle, int index) {
-	_size++;
-	if (index < 0 or index >= _size)
-		throw runtime_error("[Users::insert]Invalid index");
-	auto vehicles = new Vehicle * [_size + 1];
-	for (int i = 0; i < _size; i++) {
-		vehicles[i] = _vehicles[i];
-	}
-	for (int i = _size - 1; i > index; i--) {
-		vehicles[i] = vehicles[i - 1];
-	}
-	vehicles[index] = new Vehicle(vehicle);
-	delete[] _vehicles;
-	_vehicles = vehicles;
-	
+
+size_t VehicleList::get_size() const {
+	return _vehicles.size();
 }
-void VehicleList::add(Vehicle vehicle) {
-	auto vehicles = new Vehicle * [_size + 1];
-	for (int i = 0; i < _size; i++) {
-		vehicles[i] = _vehicles[i];
-	}
-	vehicles[_size] = new Vehicle(vehicle);
-	delete[] _vehicles;
-	_vehicles = vehicles;
-	_size++;
+
+void VehicleList::insert(VehiclePtr vehicle, int index) {
+	if (index < 0 or _vehicles.size() <= index)
+		throw runtime_error("[VehicleList::insert]Invalid index");
+
+	_vehicles.insert(_vehicles.begin() + index, vehicle);
 }
+
 void VehicleList::remove(int index) {
-	if (index < 0 or index >= _size) {
-		throw runtime_error("error");
-	}
-	delete _vehicles[index];
-	for (int i = index; i < _size - 1; i++) {
-		_vehicles[i] = _vehicles[i + 1];
-	}
-	_size--;
-}
-const Vehicle& VehicleList::get_vehicle(int index) const {
-	if (index < 0 or index >= _size)
-		throw runtime_error("error");
-	return *_vehicles[index];
+	if (index < 0 or _vehicles.size() <= index)
+		throw runtime_error("[VehicleList::remove]Invalid index");
+
+	_vehicles.erase(_vehicles.begin() + index);
 }
 
+void VehicleList::print() const {
+	for (int i = 0; i < _vehicles.size(); ++i) {
+		cout << " " << i + 1 << ")";
+		_vehicles[i]->print();
+	}
+	cout << endl;
+}
 
-std::ostream& vehicle::operator<<(std::ostream& stream, const VehicleList& vehicles) {
-	stream << vehicles.size() << " Vehicles: " << endl;
-	for (int i = 0; i < vehicles.size(); i++) cout << "  " << i + 1 << ") " << vehicles.get_vehicle(i);
-	return stream;
+int VehicleList::minim(double m, double d) {
+	int s = _vehicles.size();
+	int index = -1;
+	double min_price = _vehicles[0]->calc(m, d);
+	for (int i = 1; i < s; i++) {
+		const double price = _vehicles[i]->calc(m, d);
+		if ((index == -1) or (price < min_price)) {
+			index = i;
+			min_price = price;
+		}
+	}
+	return index;
 }

@@ -1,66 +1,49 @@
 #include <functions/vehiclearg.h>
 #include <cmath>
 #include <string>
-#include <stdexcept>
+
 using namespace std;
 using namespace vehicle;
-Vehicle::Vehicle() :_type(RAILWAY), _name(""), _k(0), _a(0), _engine(TURB) {}
-Vehicle::Vehicle(VehicleType type, string name, float k) :_type(type), _name(name), _k(k) {}
-Vehicle::Vehicle(VehicleType type, string name, float k, float a) :_type(type), _name(name), _k(k), _a(a) {}
-Vehicle::Vehicle(VehicleType type, string name, float k, EngineType engine) :_type(type), _name(name), _k(k), _engine(engine) {}
+Vehicle::Vehicle() : _name(""), _k(0) {}
+Vehicle::Vehicle(const std::string& name, double k) : _name(name), _k(k) {}
 string Vehicle::get_name() const { return _name; }
-float Vehicle::get_k() const { return _k; }
-float Vehicle::get_a() const { return _a; }
-EngineType Vehicle::get_engine() const { return _engine; }
-std::string Vehicle::get_type() const {
-    switch (_type)
+double Vehicle::get_k() const { return _k; }
+
+Railway::Railway() : Vehicle() {}
+Railway::Railway(const std::string& name, double k) : Vehicle(name, k) {}
+void Railway::print() const { cout << "Тип транспорта: Железнодорожный\n   Модель: " << _name << "\n   Базовый тариф перевозки: " << _k << "р." << endl; }
+shared_ptr<Vehicle> Railway::clone() const { return make_shared<Railway>(_name, _k); }
+double Railway::calc(double m, double d) { return _k*m*d; }
+
+Water::Water() : Vehicle(), _a(0) {}
+Water::Water(const std::string& name, double k, double a) : Vehicle(name, k), _a(a) {}
+double Water::get_a() const { return _a; }
+void Water::print() const { cout << "Тип транспорта: Водный\n   Модель: " << _name << "\n   Базовый тариф перевозки: " << _k << "р." << endl; }
+shared_ptr<Vehicle> Water::clone() const { return make_shared<Water>(_name, _k, _a); }
+double Water::calc(double m,double d) { return _k*m*d*pow(_a,d/5000); }
+
+Air::Air() : Vehicle(), _engine(REACT) {}
+Air::Air(const std::string& name, double k, EngineType engine) : Vehicle(name, k), _engine(engine) {}
+std::string Air::get_engine() const {
+    switch (_engine)
     {
-    case VehicleType::RAILWAY:
-        return "Railway";
-    case VehicleType::WATER:
-        return "Water";
-    case VehicleType::AIR:
-        return "Air";
+    case EngineType::TURB:
+        return "Turboprop";
+    case EngineType::REACT:
+        return "Reactive";
     default:
         throw runtime_error("Unknown type");
     }
 }
-float Vehicle::calc(float m, float d) {
-    switch (_type) {
-    case RAILWAY:
-        return _k * m * d;
-    case WATER:
-        return _k * m * d * pow(_a, d / 5000);
-    case AIR:
-        switch (_engine) {
-        case TURB:
-            if (d < 1000) return _k * m * d * 0.5;
-            else return _k * m * d * 1.5;
-        case REACT:
-            if (d < 1000) return _k * m * d * 1.5;
-            else return _k * m * d * 0.5;
-        }
+void Air::print() const { cout << "Тип транспорта: Воздушный\n   Модель: " << _name << "\n   Базовый тариф перевозки: " << _k << "р." << endl; }
+shared_ptr<Vehicle> Air::clone() const { return make_shared<Air>(_name, _k, _engine); }
+double Air::calc(double m, double d) {
+    if (get_engine() == "Turboprop") {
+        if (d < 1000) return _k * m * d * 0.5;
+        else return _k * m * d * 1.5;
     }
-}
-int vehicle::min(VehicleList& vehicles, float m, float d) {
-    int s = vehicles.size();
-    int index = 0;
-    float min_price = vehicles[0].calc(m, d);
-    for (int i = 1; i < s; i++) {
-        const float price = vehicles[i].calc(m, d);
-        if (price < min_price) {
-            index = i;
-            min_price = price;
-        }
+    else if (get_engine() == "Reactive") {
+        if (d < 1000) return _k * m * d * 1.5;
+        else return _k * m * d * 0.5;
     }
-    return index;
-}
-std::ostream& vehicle::operator<<(std::ostream& stream, const Vehicle& vehicle) {
-    if (vehicle.get_type() == "Railway")
-        stream << "Vehicle Type: " << vehicle.get_type() << "\n" << " Vehicle Name: " << vehicle.get_name() << "\n" << " Basic Rate: " << vehicle.get_k();
-    else if (vehicle.get_type() == "Water")
-        stream << "Vehicle Type: " << vehicle.get_type() << "\n" << " Vehicle Name: " << vehicle.get_name() << "\n" << " Basic Rate: " << vehicle.get_k() << "\n" << "Encouraging Coefficient: " << vehicle.get_a();
-    else if (vehicle.get_type() == "Air")
-        stream << "Vehicle Type: " << vehicle.get_type() << "\n" << " Vehicle Name: " << vehicle.get_name() << "\n" << " Basic Rate: " << vehicle.get_k() << "\n" << "Engine Type: " << vehicle.get_engine();
-    return stream;
 }

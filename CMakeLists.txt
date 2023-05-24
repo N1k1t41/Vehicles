@@ -34,10 +34,8 @@ add_library(vehicle SHARED
 target_include_directories(vehicle PUBLIC "include")
 
 # Объявляем тесты
-add_executable(vehicle-tests
-    "tests/vehicletests.cc"
-)
-target_link_libraries(vehicle-tests vehicle GTest::gtest_main)
+add_executable(vehicletests "tests/vehicletests.cc")
+target_link_libraries(vehicletests vehicle GTest::gtest_main)
 
 # Объявляем исполняемый файл
 add_executable(main "src/main.cc")

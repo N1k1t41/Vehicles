@@ -4,170 +4,103 @@
 #include <conio.h>
 using namespace vehicle;
 using namespace std;
-int main() {
+void app(){
+	cout << " ____________________________________________________________________" << endl;
+	cout << " |                                Меню                               |" << endl;
+	cout << " —-------------------------------------------------------------------" << endl;
+	cout << " | 1 - добавить транспорт											  |" << endl;
+	cout << " | 2 - вставить транспорт по индексу                                 |" << endl;
+	cout << " | 3 - удалить транспорт по индексу                                  |" << endl;
+	cout << " | 4 - вывести список транспорта                                     |" << endl;
+	cout << " | 5 - рассчитать стоимость перевозки                                |" << endl;
+	cout << " | 6 - поиск первого траснпорта с наименьшей стоимостью перевозки    |" << endl;
+	cout << " | 7 - выйти из системы                                              |" << endl;
+	cout << "  -------------------------------------------------------------------" << endl;
+}
+shared_ptr<Vehicle> create_vehicle(){
+	string name;
+	int type;
+	float k, a;
+	int typeeng;
+	cout << "Введите тип транспорта(Railway-1,Water-2,Air-3): ";
+	cin >> type;
+	if (type != 1 and type != 2 and type != 3)
+		throw runtime_error("Unknown type");
+	cout << "Введите название транспорта: ";
+	getline(cin >> ws, name);
+	cout << "Введите базовый тариф перевозки: ";
+	cin >> k;
+	switch (type)
+	{
+	case 1:
+		return make_shared<Railway>(name, k);
+	case 2:
+		cout << "Введите поощряющий коэффицент: ";
+		cin >> a;
+		return make_shared<Water>(name, k, a);
+	case 3:
+		cout << "Введите тип двигателя: ";
+		cin >> typeeng;
+		return make_shared<Air>(name, k, (EngineType)typeeng);
+	}
+}
+int main()
+{
 	SetConsoleTitle("Vehicles");
-	setlocale(LC_ALL, "rus");
+	setlocale(LC_ALL, "");
 	SetConsoleCP(1251);
-	int t;
-	int f = 0;
-	while (f == 0) {
+	VehicleList vehicles;
+	app();
+	while (true)
+	{
+		int k;
+		cin >> k;
+		int index = 0;
+		float m, d;
 		system("cls");
-		cout << " ____________________________________________________________________" << endl;
-		cout << " |                                Меню                               |" << endl;
-		cout << " —-------------------------------------------------------------------" << endl;
-		cout << " | 1 - добавить транспорт                                            |" << endl;
-		cout << " | 2 - добавить новый транспорт по индексу                           |" << endl;
-		cout << " | 3 - удалить транспорт по индексу                                  |" << endl;
-		cout << " | 4 - вывести список транспорта                                     |" << endl;
-		cout << " | 5 - рассчитать цену транспортировки                               |" << endl;
-		cout << " | 6 - поиск первого траснпорта с наименьшей ценой транспортировки   |" << endl;
-		cout << " | 7 - выйти из системы                                              |" << endl;
-		cout << "  -------------------------------------------------------------------" << endl;
-		cin >> t;
-		int s = 0;
-		VehicleList vehicles;
-		string type;
-		switch (t) {
+		app();
+		if (k == 7) {
+			vehicles.clear();
+			break;
+		}
+		switch (k)
+		{
 		case 1:
-			while (s == 0) {
-				cout << "Введите тип транспорта(Railway,Water,Air): ";
-				cin >> type;
-				if (type == "Railway") {
-					VehicleType vtype = RAILWAY;
-					string name;
-					float k;
-					cout << "Введите название траснпорта: ";
-					cin >> name;
-					cout << "Введите базовый тариф перевозки: ";
-					cin >> k;
-					auto v = Vehicle(vtype, name, k);
-					vehicles.add(v);
-					s++;
-				}
-				else if (type == "Water") {
-					VehicleType vtype = WATER;
-					string name;
-					float a;
-					float k;
-					cout << "Введите название траснпорта: ";
-					cin >> name;
-					cout << "Введите базовый тариф перевозки: ";
-					cin >> k;
-					cout << "Введите поощряющий коэффицент: ";
-					cin >> a;
-					auto v = Vehicle(vtype, name, k, a);
-					vehicles.add(v);
-					s++;
-				}
-				else if (type == "Air") {
-					VehicleType vtype = WATER;
-					string name;
-					string engine;
-					EngineType eng;
-					float k;
-					cout << "Введите название траснпорта: ";
-					cin >> name;
-					cout << "Введите базовый тариф перевозки: ";
-					cin >> k;
-					int e = 0;
-					while (e == 0) {
-						cout << "Введите тип двигателя(Turboprop, Reactive)";
-						cin >> engine;
-						if (engine == "Turboprop") {
-							eng = TURB;
-							e++;
-						}
-						else if (engine == "Reactive") {
-							eng = TURB;
-							e++;
-						}
-						else  e = 0;
-						auto v = Vehicle(vtype, name, k, eng);
-						vehicles.add(v);
-						s++;
-					}
-				}
-				else {
-					cout << "Неверный тип";
-					s = 0;
-				}
-			}
+			system("cls");
+			vehicles.add(create_vehicle());
+			system("cls");
+			app();
 			break;
 		case 2:
-			int index;
-			cout << "Введите индекс: ";
+			cout << "Введите индекс для вставки транспорта: ";
 			cin >> index;
-			while (s == 0) {
-				cout << "Введите тип транспорта(Railway,Water,Air): ";
-				cin >> type;
-				if (type == "Railway") {
-					VehicleType vtype = RAILWAY;
-					string name;
-					float k;
-					cout << "Введите название траснпорта: ";
-					cin >> name;
-					cout << "Введите базовый тариф перевозки: ";
-					cin >> k;
-					auto v = Vehicle(vtype, name, k);
-					vehicles.insert(v, index);
-					s++;
-				}
-				else if (type == "Water") {
-					VehicleType vtype = WATER;
-					string name;
-					float a;
-					float k;
-					cout << "Введите название траснпорта: ";
-					cin >> name;
-					cout << "Введите базовый тариф перевозки: ";
-					cin >> k;
-					cout << "Введите поощряющий коэффицент: ";
-					cin >> a;
-					auto v = Vehicle(vtype, name, k, a);
-					vehicles.insert(v, index);
-					s++;
-				}
-				else if (type == "Air") {
-					VehicleType vtype = WATER;
-					string name;
-					string engine;
-					EngineType eng;
-					float k;
-					cout << "Введите название траснпорта: ";
-					cin >> name;
-					cout << "Введите базовый тариф перевозки: ";
-					cin >> k;
-					int e = 0;
-					while (e == 0) {
-						cout << "Введите тип двигателя(Turboprop, Reactive)";
-						cin >> engine;
-						if (engine == "Turboprop") {
-							eng = TURB;
-							e++;
-						}
-						else if (engine == "Reactive") {
-							eng = TURB;
-							e++;
-						}
-						else  e = 0;
-						auto v = Vehicle(vtype, name, k, eng);
-						vehicles.insert(v, index);
-						s++;
-					}
-				}
-				else {
-					cout << "Неверный тип";
-					s = 0;
-				}
-			}
+			vehicles.insert(create_vehicle(), index);
 			break;
 		case 3:
+			cout << "Введите индекс транспорта, который нужно удалить: ";
+			cin >> index;
+			vehicles.remove(index);
 			break;
 		case 4:
-			cout << vehicles;
+			vehicles.print();
+			break;
+		case 5:
+			cout << "Введите массу товара: ";
+			cin >> m;
+			cout << "Введите расстояние: ";
+			cin >> d;
+			cout << "Введите индекс транспорта, стоимость перевозки которого нужно посчитать: ";
+			cin >> index;
+			cout << vehicles[index]->calc(m, d);
+			break;
+		case 6:
+			cout << "Введите массу товара: ";
+			cin >> m;
+			cout << "Введите расстояние: ";
+			cin >> d;
+			cout << "Индекс транспорта с минимальной стоимостью перевозки: " << vehicles.minim(m, d) << endl;
 			break;
 		}
 	}
-
-
+	return 0;
 }
